@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+      integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+      integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+      crossorigin=""
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+      integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+      crossorigin="anonymous"
+    ></script>
+    <title>Document</title>
+  </head>
+  <!-- As a link -->
+  <nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand" href="#">Uber app</a>
+  </nav>
+  <br />
+  <body>
+    <div class="container">
+      <p>Showing Ubers near your location...</p>
+      <ul class="list bg-primary rounded" style="color: white; padding: 5px">
+        <li class="media">
+          <img src="car.png" width="80px" class="mr-3" alt="..." />
+          <div class="media-body">
+            <h5 class="mt-0 mb-1">Car icon</h5>
+            Active Uber driver
+            <br />
+            <button
+              class="btn btn-primary"
+              style="text-decoration: underline"
+              id="find"
+            >
+              Find me a ride
+            </button>
+            <span id="timer"></span>
+          </div>
+        </li>
+      </ul>
+      <div id="mymapdiv" class="shadow p-3 mb-5 bg-white rounded"></div>
+    </div>
+    <style>
+      #mymapdiv {
+        height: 480px;
+        width: auto;
+      }
+    </style>
+
+    <!-- script -->
+    <script>
+      var mymap = L.map("mymapdiv").setView([-33.90362, 151.24482], 16);
+      L.tileLayer(
+        "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+
+        {
+          attribution:
+            'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          maxZoom: 20,
+          id: "mapbox/streets-v11",
+          tileSize: 512,
+          zoomOffset: -1,
+          accessToken:
+            "pk.eyJ1IjoiZWx2aXNtIiwiYSI6ImNrZWdyOWtpYzAza2sycW5wdHQ1ODJ0YXUifQ.77Dk59NUSXVAvNHpRHyiLA",
+        }
+      ).addTo(mymap);
+
+      Mylocation = L.marker([-33.90262, 151.24482])
+        .addTo(mymap)
+        .bindPopup("You");
+
+      var uberCar1 = L.icon({
+        iconUrl: "car.png",
+        iconSize: [80, 60],
+        iconAnchor: [40, 30],
+      });
+
+      var uberCar2 = L.icon({
+        iconUrl: "car2.png",
+        iconSize: [60, 80],
+        iconAnchor: [30, 40],
+      });
+      car1 = L.marker([-33.90578, 151.23956], { icon: uberCar1 })
+        .addTo(mymap)
+        .bindPopup("Driver Davis Wong");
+      car2 = L.marker([-33.90688, 151.24996], { icon: uberCar2 })
+        .addTo(mymap)
+        .bindPopup("Driver Brad Newmann")
+        .openPopup();
+      var find = document.getElementById("find");
+
+      find.onclick = (e) => {
+        document.getElementById("find").disabled = true;
+
+        xhr = new XMLHttpRequest();
+        xhr.open("GET", "/start", true);
+
+        timer.innerHTML =
+          "Please wait for one minute, Driver Brad Newmann is on his way!";
+
+        xhr.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            document.getElementById("timer").innerHTML =
+              "Uber arrived! Have a safe trip!";
+            cords = this.responseText.split(",", 2);
+            mymap.removeLayer(car2);
+            L.marker([cords[0], cords[1]], { icon: uberCar2 })
+              .addTo(mymap)
+              .bindPopup("Driver Brad Newmann");
+          }
+        };
+
+        xhr.send();
+      };
+    </script>
+  </body>
+</html>
